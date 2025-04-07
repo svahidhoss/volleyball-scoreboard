@@ -32,6 +32,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.team_a_score_area).setOnClickListener { incrementScore("A") }
         findViewById<View>(R.id.team_b_score_area).setOnClickListener { incrementScore("B") }
 
+        findViewById<View>(R.id.button_minus_a).setOnClickListener { decrementScore("A") }
+        findViewById<View>(R.id.button_minus_b).setOnClickListener { decrementScore("B") }
+
         findViewById<Button>(R.id.reset_set_button).setOnClickListener { resetSet() }
         findViewById<Button>(R.id.reset_match_button).setOnClickListener { resetMatch() }
     }
@@ -43,6 +46,20 @@ class MainActivity : AppCompatActivity() {
             teamAScoreTextView.text = "$teamAScore"
         } else if (team == "B") {
             teamBScore++
+            checkSetWinner()
+            teamBScoreTextView.text = "$teamBScore"
+        }
+    }
+
+    private fun decrementScore(team: String) {
+        if (team == "A") {
+            if (teamAScore < 0) return
+            teamAScore--
+            checkSetWinner()
+            teamAScoreTextView.text = "$teamAScore"
+        } else if (team == "B") {
+            if (teamBScore < 0) return
+            teamBScore--
             checkSetWinner()
             teamBScoreTextView.text = "$teamBScore"
         }

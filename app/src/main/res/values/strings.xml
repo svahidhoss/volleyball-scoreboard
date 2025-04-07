@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Scoreboard</string>
+    <string name="reduce_score">Reduce score</string>
 </resources>
