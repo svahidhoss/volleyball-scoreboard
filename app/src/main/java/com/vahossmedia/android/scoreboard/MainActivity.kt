@@ -53,12 +53,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun decrementScore(team: String) {
         if (team == "A") {
-            if (teamAScore < 0) return
+            if (teamAScore <= 0) return
             teamAScore--
             checkSetWinner()
             teamAScoreTextView.text = "$teamAScore"
         } else if (team == "B") {
-            if (teamBScore < 0) return
+            if (teamBScore <= 0) return
             teamBScore--
             checkSetWinner()
             teamBScoreTextView.text = "$teamBScore"
