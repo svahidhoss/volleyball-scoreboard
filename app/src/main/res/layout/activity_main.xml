@@ -45,7 +45,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#FFDDDD"
+            android:background="#B84023"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -64,7 +64,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#DDDDFF"
+            android:background="#0191A0"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -122,14 +122,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset Set" />
+            android:text="@string/reset_set" />
 
         <Button
             android:id="@+id/reset_match_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Reset Match" />
+            android:text="@string/reset_match" />
 
     </LinearLayout>
 
