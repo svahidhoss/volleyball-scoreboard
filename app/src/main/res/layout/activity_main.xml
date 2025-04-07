@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Top Section: Team Names and Sets Won -->
+    <TextView
+        android:id="@+id/team_a_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Team A Sets: 0"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/team_b_sets"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.5" />
+
+    <TextView
+        android:id="@+id/team_b_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Team B Sets: 0"
+        android:textAlignment="textEnd"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/team_a_sets"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.5" />
+
+    <!-- Middle Section: Scoreboard -->
+    <LinearLayout
+        android:id="@+id/scoreboard_area"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/reset_buttons_area"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/team_a_sets">
+
+        <!-- Team A Score -->
+        <LinearLayout
+            android:id="@+id/team_a_score_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFDDDD"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/team_a_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="100sp" />
+
+        </LinearLayout>
+
+        <!-- Team B Score -->
+        <LinearLayout
+            android:id="@+id/team_b_score_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#DDDDFF"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/team_b_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="100sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom Section: Reset Buttons -->
+    <LinearLayout
+        android:id="@+id/reset_buttons_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/reset_set_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reset Set" />
+
+        <Button
+            android:id="@+id/reset_match_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Reset Match" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
