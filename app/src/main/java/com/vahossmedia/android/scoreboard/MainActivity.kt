@@ -2,52 +2,41 @@ package com.vahossmedia.android.scoreboard
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
-import android.widget.Button
-import android.widget.TextView
+import com.vahossmedia.android.scoreboard.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
 
     private var teamAScore = 0
     private var teamBScore = 0
     private var teamASets = 0
     private var teamBSets = 0
 
-    private lateinit var teamAScoreTextView: TextView
-    private lateinit var teamBScoreTextView: TextView
-    private lateinit var teamASetsTextView: TextView
-    private lateinit var teamBSetsTextView: TextView
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // Initialize views
-        teamAScoreTextView = findViewById(R.id.team_a_score)
-        teamBScoreTextView = findViewById(R.id.team_b_score)
-        teamASetsTextView = findViewById(R.id.team_a_sets)
-        teamBSetsTextView = findViewById(R.id.team_b_sets)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Set up click listeners
-        findViewById<View>(R.id.team_a_score_area).setOnClickListener { incrementScore("A") }
-        findViewById<View>(R.id.team_b_score_area).setOnClickListener { incrementScore("B") }
+        binding.teamAScoreArea.setOnClickListener { incrementScore("A") }
+        binding.teamBScoreArea.setOnClickListener { incrementScore("B") }
 
-        findViewById<View>(R.id.button_minus_a).setOnClickListener { decrementScore("A") }
-        findViewById<View>(R.id.button_minus_b).setOnClickListener { decrementScore("B") }
+        binding.buttonDecrementScoreA.setOnClickListener { decrementScore("A") }
+        binding.buttonDecrementScoreB.setOnClickListener { decrementScore("B") }
 
-        findViewById<Button>(R.id.reset_set_button).setOnClickListener { resetSet() }
-        findViewById<Button>(R.id.reset_match_button).setOnClickListener { resetMatch() }
+        binding.buttonResetSet.setOnClickListener { resetSet() }
+        binding.buttonResetMatch.setOnClickListener { resetMatch() }
     }
 
     private fun incrementScore(team: String) {
         if (team == "A") {
             teamAScore++
             checkSetWinner()
-            teamAScoreTextView.text = "$teamAScore"
+            binding.textviewTeamAScore.text = "$teamAScore"
         } else if (team == "B") {
             teamBScore++
             checkSetWinner()
-            teamBScoreTextView.text = "$teamBScore"
+            binding.textviewTeamBScore.text = "$teamBScore"
         }
     }
 
@@ -56,12 +45,12 @@ class MainActivity : AppCompatActivity() {
             if (teamAScore <= 0) return
             teamAScore--
             checkSetWinner()
-            teamAScoreTextView.text = "$teamAScore"
+            binding.textviewTeamAScore.text = "$teamAScore"
         } else if (team == "B") {
             if (teamBScore <= 0) return
             teamBScore--
             checkSetWinner()
-            teamBScoreTextView.text = "$teamBScore"
+            binding.textviewTeamBScore.text = "$teamBScore"
         }
     }
 
@@ -72,10 +61,10 @@ class MainActivity : AppCompatActivity() {
         ) {
             if (teamAScore > teamBScore) {
                 teamASets++
-                teamASetsTextView.text = "Team A Sets: $teamASets"
+                binding.textviewTeamASets.text = "Team A Sets: $teamASets"
             } else {
                 teamBSets++
-                teamBSetsTextView.text = "Team B Sets: $teamBSets"
+                binding.textviewTeamBSets.text = "Team B Sets: $teamBSets"
             }
             resetSet()
         }
@@ -84,15 +73,15 @@ class MainActivity : AppCompatActivity() {
     private fun resetSet() {
         teamAScore = 0
         teamBScore = 0
-        teamAScoreTextView.text = "$teamAScore"
-        teamBScoreTextView.text = "$teamBScore"
+        binding.textviewTeamAScore.text = "$teamAScore"
+        binding.textviewTeamBScore.text = "$teamBScore"
     }
 
     private fun resetMatch() {
         resetSet()
         teamASets = 0
         teamBSets = 0
-        teamASetsTextView.text = "Team A Sets: $teamASets"
-        teamBSetsTextView.text = "Team B Sets: $teamBSets"
+        binding.textviewTeamASets.text = "Team A Sets: $teamASets"
+        binding.textviewTeamBSets.text = "Team B Sets: $teamBSets"
     }
 }
