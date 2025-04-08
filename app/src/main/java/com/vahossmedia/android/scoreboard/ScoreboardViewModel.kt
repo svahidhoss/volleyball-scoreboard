@@ -3,8 +3,11 @@ package com.vahossmedia.android.scoreboard
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -18,11 +21,11 @@ class ScoreboardViewModel : ViewModel() {
     private val _scoreboardState = MutableStateFlow(ScoreboardState())
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
-    private val _setWonEvent = MutableStateFlow("")
-    val setWonEvent: StateFlow<String> = _setWonEvent
+    private val _setWonEvent = MutableSharedFlow<String>()
+    val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
 
-    private val _matchWonEvent = MutableStateFlow("")
-    val matchWonEvent: StateFlow<String> = _matchWonEvent
+    private val _matchWonEvent = MutableSharedFlow<String>()
+    val matchWonEvent: SharedFlow<String> = _matchWonEvent.asSharedFlow()
 
     init {
         Log.d(TAG, "ViewModel instance created")
@@ -58,20 +61,30 @@ class ScoreboardViewModel : ViewModel() {
         ) {
             if (currentState.teamAScore > currentState.teamBScore) {
                 _scoreboardState.value = currentState.copy(teamASets = currentState.teamASets + 1)
-                _setWonEvent.value = "Team A wins the set!"
+                viewModelScope.launch {
+                    _setWonEvent.emit("Team A wins the set!")
+                }
             } else {
                 _scoreboardState.value = currentState.copy(teamBSets = currentState.teamBSets + 1)
-                _setWonEvent.value = "Team B wins the set!"
+                viewModelScope.launch {
+                    _setWonEvent.emit("Team B wins the set!")
+                }
             }
             resetSet()
         }
 
         // Check for match win
         if (currentState.teamASets >= 3 || currentState.teamBSets >= 3) {
-            if (currentState.teamASets > currentState.teamBSets)
-                _matchWonEvent.value = "Team A wins the match!"
-            else
-                _matchWonEvent.value = "Team B wins the match!"
+            if (currentState.teamASets > currentState.teamBSets) {
+                viewModelScope.launch {
+                    _matchWonEvent.emit("Team A wins the match!")
+                }
+            } else {
+                viewModelScope.launch {
+                    _matchWonEvent.emit("Team B wins the match!")
+                }
+            }
+
         }
     }
 

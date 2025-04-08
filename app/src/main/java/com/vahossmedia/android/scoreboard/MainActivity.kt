@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.matchWonEvent.collectLatest { message ->
+            viewModel.matchWonEvent.collect { message ->
                 if (message.isNotEmpty()) {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle("Match Won!")
@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.setWonEvent.collectLatest { message ->
+            viewModel.setWonEvent.collect { message ->
                 if (message.isNotEmpty()) {
                     Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
                     // TODO: Play sound effect here
