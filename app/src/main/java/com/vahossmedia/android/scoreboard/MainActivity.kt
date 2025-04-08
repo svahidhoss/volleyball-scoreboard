@@ -1,8 +1,10 @@
 package com.vahossmedia.android.scoreboard
 
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.vahossmedia.android.scoreboard.databinding.ActivityMainBinding
 import kotlinx.coroutines.flow.collectLatest
@@ -31,6 +33,28 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.scoreboardState.collectLatest {
                 updateUI(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.matchWonEvent.collectLatest { message ->
+                if (message.isNotEmpty()) {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("Match Won!")
+                        .setMessage(message)
+                        .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                        .show()
+                    // TODO: Play sound effect here
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.setWonEvent.collectLatest { message ->
+                if (message.isNotEmpty()) {
+                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                    // TODO: Play sound effect here
+                }
             }
         }
     }
