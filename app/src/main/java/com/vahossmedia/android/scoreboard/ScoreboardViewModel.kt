@@ -26,7 +26,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     )
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
-    private val _setWonEvent = MutableSharedFlow<String>()
+    private val _setWonEvent = MutableSharedFlow<String>(replay = 1)
     val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
 
     private val _matchWonEvent = MutableStateFlow("")
