@@ -1,6 +1,7 @@
 package com.vahossmedia.android.scoreboard
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -10,22 +11,27 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 private const val TAG = "VolleyballViewModel"
+const val CURRENT_BOARD_STATE_KEY = "CURRENT_BOARD_STATE_KEY"
 
 // Volleyball default
 private const val WINNING_SCORE = 25
 
-class ScoreboardViewModel : ViewModel() {
+class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    private val _scoreboardState = MutableStateFlow(ScoreboardState())
+    private val _scoreboardState = MutableStateFlow(
+        savedStateHandle[CURRENT_BOARD_STATE_KEY] ?: ScoreboardState()
+    )
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
     private val _setWonEvent = MutableSharedFlow<String>()
     val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
 
-    private val _matchWonEvent = MutableSharedFlow<String>()
-    val matchWonEvent: SharedFlow<String> = _matchWonEvent.asSharedFlow()
+    private val _matchWonEvent = MutableStateFlow("")
+    val matchWonEvent: StateFlow<String> = _matchWonEvent
+
 
     init {
         Log.d(TAG, "ViewModel instance created")
@@ -39,6 +45,7 @@ class ScoreboardViewModel : ViewModel() {
             } else if (team == "B") {
                 _scoreboardState.value = currentState.copy(teamBScore = currentState.teamBScore + 1)
             }
+            savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
             checkSetWinner()
         }
     }
@@ -52,12 +59,13 @@ class ScoreboardViewModel : ViewModel() {
                 _scoreboardState.value = currentState.copy(teamBScore = currentState.teamBScore - 1)
             }
         }
+        savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
     }
 
     private fun checkSetWinner() {
         val currentState = _scoreboardState.value
         if ((currentState.teamAScore >= WINNING_SCORE || currentState.teamBScore >= WINNING_SCORE) &&
-            Math.abs(currentState.teamAScore - currentState.teamBScore) >= 2
+            abs(currentState.teamAScore - currentState.teamBScore) >= 2
         ) {
             if (currentState.teamAScore > currentState.teamBScore) {
                 _scoreboardState.value = currentState.copy(teamASets = currentState.teamASets + 1)
