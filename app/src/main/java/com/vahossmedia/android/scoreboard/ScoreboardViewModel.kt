@@ -82,8 +82,8 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
 
         // Check for match win
-        if (currentState.teamASets >= 3 || currentState.teamBSets >= 3) {
-            if (currentState.teamASets > currentState.teamBSets) {
+        if (_scoreboardState.value.teamASets >= 3 || _scoreboardState.value.teamBSets >= 3) {
+            if (_scoreboardState.value.teamASets > _scoreboardState.value.teamBSets) {
                 viewModelScope.launch {
                     _matchWonEvent.emit("Team A wins the match!")
                 }
@@ -92,7 +92,6 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
                     _matchWonEvent.emit("Team B wins the match!")
                 }
             }
-
         }
     }
 
