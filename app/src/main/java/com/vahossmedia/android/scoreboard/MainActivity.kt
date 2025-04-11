@@ -24,15 +24,22 @@ class MainActivity : AppCompatActivity() {
         binding.teamAScoreArea.setOnClickListener { viewModel.incrementScore("A") }
         binding.teamBScoreArea.setOnClickListener { viewModel.incrementScore("B") }
 
-        binding.buttonDecrementScoreA.setOnClickListener { viewModel.decrementScore("A") }
-        binding.buttonDecrementScoreB.setOnClickListener { viewModel.decrementScore("B") }
+        binding.buttonUndo.setOnClickListener { viewModel.undo() }
 
         binding.buttonResetSet.setOnClickListener { viewModel.resetSet() }
         binding.buttonResetMatch.setOnClickListener { viewModel.resetMatch() }
 
+        // Observe state changes
         lifecycleScope.launch {
             viewModel.scoreboardState.collectLatest {
                 updateUI(it)
+            }
+        }
+
+        // Observe undo availability
+        lifecycleScope.launch {
+            viewModel.canUndo.collectLatest { canUndo ->
+                binding.buttonUndo.isEnabled = canUndo
             }
         }
 

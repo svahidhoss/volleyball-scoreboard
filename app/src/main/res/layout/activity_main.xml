@@ -33,6 +33,7 @@
         android:id="@+id/scoreboard_area"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,34 +80,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/minus_buttons_area"
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/reset_buttons_area"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/button_decrement_score_a"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/decrement_score" />
-
-        <Button
-            android:id="@+id/button_decrement_score_b"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/decrement_score" />
-
-    </LinearLayout>
-
     <!-- Bottom Section: Reset Buttons -->
     <LinearLayout
         android:id="@+id/reset_buttons_area"
@@ -118,12 +91,21 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <Button
+            android:id="@+id/button_undo"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="@string/undo"
+            app:icon="@drawable/undo"
+            app:iconGravity="end" />
+
+        <Button
             android:id="@+id/button_reset_set"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_margin="4dp"
             android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:text="@string/reset_set" />
@@ -132,9 +114,7 @@
             android:id="@+id/button_reset_match"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
+            android:layout_margin="4dp"
             android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:text="@string/reset_match" />

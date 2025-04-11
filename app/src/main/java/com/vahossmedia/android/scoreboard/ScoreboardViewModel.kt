@@ -26,18 +26,28 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     )
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
+    // Events
     private val _setWonEvent = MutableSharedFlow<String>(replay = 1)
     val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
 
     private val _matchWonEvent = MutableStateFlow("")
     val matchWonEvent: StateFlow<String> = _matchWonEvent
 
+    // For undo functionality
+    private val _canUndo = MutableStateFlow(false)
+    val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
+
+    // Stack to store previous states (limited to 10 entries)
+    private val undoStack = ArrayDeque<ScoreboardState>(10)
 
     init {
         Log.d(TAG, "ViewModel instance created")
     }
 
     fun incrementScore(team: String) {
+        // Save current state for undo
+        saveStateForUndo()
+
         viewModelScope.launch {
             val currentState = _scoreboardState.value
             if (team == "A") {
@@ -46,20 +56,35 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
                 _scoreboardState.value = currentState.copy(teamBScore = currentState.teamBScore + 1)
             }
             savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
+
+            // Update undo availability
+            _canUndo.value = undoStack.isNotEmpty()
+
             checkSetWinner()
         }
     }
 
-    fun decrementScore(team: String) {
-        viewModelScope.launch {
-            val currentState = _scoreboardState.value
-            if (team == "A" && _scoreboardState.value.teamAScore > 0) {
-                _scoreboardState.value = currentState.copy(teamAScore = currentState.teamAScore - 1)
-            } else if (team == "B" && _scoreboardState.value.teamBScore > 0) {
-                _scoreboardState.value = currentState.copy(teamBScore = currentState.teamBScore - 1)
-            }
+    fun undo() {
+        if (undoStack.isNotEmpty()) {
+            // Restore previous state
+            val previousState = undoStack.removeLast()
+            _scoreboardState.value = previousState
+
+            // Save to SavedStateHandle
+            savedStateHandle[CURRENT_BOARD_STATE_KEY] = previousState
+
+            // Update undo availability
+            _canUndo.value = undoStack.isNotEmpty()
         }
-        savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
+    }
+
+    /**
+     * Add current state to undo stack.
+     */
+    private fun saveStateForUndo() {
+        if (undoStack.size >= 10) undoStack.removeFirst()
+
+        undoStack.add(_scoreboardState.value)
     }
 
     private fun checkSetWinner() {
@@ -96,11 +121,21 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     fun resetSet() {
+        saveStateForUndo()
         _scoreboardState.value = _scoreboardState.value.copy(teamAScore = 0, teamBScore = 0)
+
+        // Update stored state and undo availability
+        savedStateHandle["scoreboardState"] = _scoreboardState.value
+        _canUndo.value = undoStack.isNotEmpty()
     }
 
     fun resetMatch() {
+        saveStateForUndo()
         _scoreboardState.value = ScoreboardState()
+
+        // Update stored state and undo availability
+        savedStateHandle["scoreboardState"] = _scoreboardState.value
+        _canUndo.value = undoStack.isNotEmpty()
     }
 
     override fun onCleared() {
