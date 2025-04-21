@@ -72,7 +72,6 @@ class ScoreboardViewModelTest {
 
         // Increment Team B's score to 25 to win a set
         repeat(25) { viewModel.incrementScore("B") }
-
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Check that Team B has won 1 set
@@ -129,5 +128,52 @@ class ScoreboardViewModelTest {
         assertEquals(0, viewModel.scoreboardState.value.teamBSets)
         assertEquals(0, viewModel.scoreboardState.value.teamAScore)
         assertEquals(0, viewModel.scoreboardState.value.teamBScore)
+    }
+
+    @Test
+    fun testUndo() {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = ScoreboardViewModel(savedStateHandle)
+
+        // Initial state - canUndo should be false
+        assertEquals(false, viewModel.canUndo.value)
+
+        // Increment score
+        viewModel.incrementScore("A")
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(1, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(true, viewModel.canUndo.value)
+
+        // Undo
+        viewModel.undo()
+        assertEquals(0, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(false, viewModel.canUndo.value)
+    }
+
+    @Test
+    fun testMultipleUndos() {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = ScoreboardViewModel(savedStateHandle)
+
+        // Perform multiple actions
+        repeat(5) {
+            viewModel.incrementScore("A")
+            testDispatcher.scheduler.advanceUntilIdle()
+        }
+        assertEquals(5, viewModel.scoreboardState.value.teamAScore)
+
+        // Undo multiple times
+        repeat(3) {
+            viewModel.undo()
+        }
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(2, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(true, viewModel.canUndo.value)
+
+        // Undo remaining actions
+        repeat(2) { viewModel.undo() }
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertEquals(0, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(false, viewModel.canUndo.value)
     }
 }
