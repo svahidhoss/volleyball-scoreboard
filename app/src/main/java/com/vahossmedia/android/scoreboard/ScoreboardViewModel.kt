@@ -33,25 +33,22 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val _matchWonEvent = MutableStateFlow("")
     val matchWonEvent: StateFlow<String> = _matchWonEvent
 
-    // For undo functionality
+    // Undo and Redo stacks
+    private val undoStack = ArrayDeque<ScoreboardState>(10)
+    private val redoStack = ArrayDeque<ScoreboardState>(10)
+
+    // States to expose redo/undo availability
     private val _canUndo = MutableStateFlow(false)
     val canUndo: StateFlow<Boolean> = _canUndo.asStateFlow()
-
-    // Stack to store previous states (limited to 10 entries)
-    private val undoStack = ArrayDeque<ScoreboardState>(10)
-
-    // State to expose redo availability
     private val _canRedo = MutableStateFlow(false)
     val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
-
-    // Stack to store redo-able states (limited to 10 entries)
-    private val redoStack = ArrayDeque<ScoreboardState>(10)
 
     init {
         Log.d(TAG, "ViewModel instance created")
     }
 
     fun incrementScore(team: String) {
+        clearRedoStack()
         // Save current state for undo
         saveStateForUndo()
 
@@ -104,7 +101,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     /**
-     * Add current state to undo stack.
+     * Save current state to undo stack, maintain size limit
      */
     private fun saveStateForUndo() {
         if (undoStack.size >= 10) undoStack.removeFirst()
@@ -112,9 +109,22 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         undoStack.add(_scoreboardState.value)
     }
 
+    /**
+     * Save current state to redo stack, maintain size limit
+     */
     private fun saveStateForRedo() {
         if (redoStack.size >= 10) redoStack.removeFirst()
         redoStack.add(_scoreboardState.value)
+    }
+
+    /**
+     * Call clearRedoStack() at the beginning of any action
+     * that changes state in a “new” way:
+     * like incrementScore, resetSet or resetMatch
+     */
+    private fun clearRedoStack() {
+        redoStack.clear()
+        _canRedo.value = false
     }
 
     private fun checkSetWinner() {
@@ -151,6 +161,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     fun resetSet() {
+        clearRedoStack()
         saveStateForUndo()
         _scoreboardState.value = _scoreboardState.value.copy(teamAScore = 0, teamBScore = 0)
 
@@ -160,6 +171,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     fun resetMatch() {
+        clearRedoStack()
         saveStateForUndo()
         _scoreboardState.value = ScoreboardState()
 
