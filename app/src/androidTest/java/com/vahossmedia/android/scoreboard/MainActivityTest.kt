@@ -144,4 +144,46 @@ class MainActivityTest {
         // Dismiss dialog
         onView(withText("OK")).perform(click())
     }
+
+    @Test
+    fun undoButtonDoesNotGoBelowInitialState() {
+        // Click Team A score 3 times
+        repeat(3) { onView(withId(R.id.team_a_score_area)).perform(click()) }
+        // Undo 4 times (1 more than actual actions)
+        repeat(4) { onView(withId(R.id.button_undo)).perform(click()) }
+        // Team A score should be 0, and undo should be disabled
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("0")))
+        onView(withId(R.id.button_undo)).check(matches(not(isEnabled())))
+    }
+
+    @Test
+    fun rapidUndoInteractionIsStable() {
+        repeat(7) { onView(withId(R.id.team_a_score_area)).perform(click()) }
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("7")))
+        // Now rapidly undo (simulate user hammering button)
+        repeat(10) { onView(withId(R.id.button_undo)).perform(click()) }
+        // Score should be zero
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("0")))
+    }
+
+    @Test
+    fun stressTestIncrementingScore() {
+        // Team B: 75 rapid increments
+        repeat(75) { onView(withId(R.id.team_b_score_area)).perform(click()) }
+
+        // Match win dialog should appear with appropriate message
+        onView(withText("Match Won!")).check(matches(isDisplayed()))
+        onView(withText(containsString("Team B: 3 sets"))).check(matches(isDisplayed()))
+        onView(withText("OK")).perform(click())
+
+        // Team B: 25 rapid increments
+        repeat(25) { onView(withId(R.id.team_b_score_area)).perform(click()) }
+
+        // You can check for set wins, sets increment, and score resets,
+        // but let's just check that the UI remains consistent.
+        // (If app supports unlimited sets, this is fine.)
+        onView(withId(R.id.textview_team_b_score)).check(matches(withText("0"))) // It should reset and increment sets
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("4"))))
+        onView(withId(R.id.textview_team_a_sets)).check(matches(withText(containsString("0"))))
+    }
 }
