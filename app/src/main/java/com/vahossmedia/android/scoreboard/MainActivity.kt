@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         binding.teamBScoreArea.setOnClickListener { viewModel.incrementScore("B") }
 
         binding.buttonUndo.setOnClickListener { viewModel.undo() }
+        binding.buttonRedo.setOnClickListener { viewModel.redo() }
 
         binding.buttonResetSet.setOnClickListener { viewModel.resetSet() }
         binding.buttonResetMatch.setOnClickListener { viewModel.resetMatch() }
@@ -40,6 +41,13 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.canUndo.collectLatest { canUndo ->
                 binding.buttonUndo.isEnabled = canUndo
+            }
+        }
+
+        // Observe redo availability
+        lifecycleScope.launch {
+            viewModel.canRedo.collectLatest {
+                binding.buttonRedo.isEnabled = it
             }
         }
 

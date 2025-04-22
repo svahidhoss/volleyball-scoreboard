@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Scoreboard</string>
     <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
     <string name="reset_match">Reset Match</string>
     <string name="reset_set">Reset Set</string>
 </resources>

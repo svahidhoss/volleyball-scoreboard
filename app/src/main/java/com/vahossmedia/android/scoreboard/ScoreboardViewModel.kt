@@ -40,6 +40,13 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     // Stack to store previous states (limited to 10 entries)
     private val undoStack = ArrayDeque<ScoreboardState>(10)
 
+    // State to expose redo availability
+    private val _canRedo = MutableStateFlow(false)
+    val canRedo: StateFlow<Boolean> = _canRedo.asStateFlow()
+
+    // Stack to store redo-able states (limited to 10 entries)
+    private val redoStack = ArrayDeque<ScoreboardState>(10)
+
     init {
         Log.d(TAG, "ViewModel instance created")
     }
@@ -66,6 +73,8 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     fun undo() {
         if (undoStack.isNotEmpty()) {
+            // Save current state for redo
+            saveStateForRedo()
             // Restore previous state
             val previousState = undoStack.removeLast()
             _scoreboardState.value = previousState
@@ -73,7 +82,23 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
             // Save to SavedStateHandle
             savedStateHandle[CURRENT_BOARD_STATE_KEY] = previousState
 
-            // Update undo availability
+            // Update availability
+            _canRedo.value = redoStack.isNotEmpty()
+            _canUndo.value = undoStack.isNotEmpty()
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            // Restore next state
+            val nextState = redoStack.removeLast()
+            _scoreboardState.value = nextState
+
+            // Save to SavedStateHandle
+            savedStateHandle[CURRENT_BOARD_STATE_KEY] = nextState
+
+            // Update availability
+            _canRedo.value = redoStack.isNotEmpty()
             _canUndo.value = undoStack.isNotEmpty()
         }
     }
@@ -85,6 +110,11 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         if (undoStack.size >= 10) undoStack.removeFirst()
 
         undoStack.add(_scoreboardState.value)
+    }
+
+    private fun saveStateForRedo() {
+        if (redoStack.size >= 10) redoStack.removeFirst()
+        redoStack.add(_scoreboardState.value)
     }
 
     private fun checkSetWinner() {
