@@ -27,11 +27,11 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
     // Events
-    private val _setWonEvent = MutableSharedFlow<String>(replay = 1)
+    private val _setWonEvent = MutableSharedFlow<String>()
     val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
 
-    private val _matchWonEvent = MutableStateFlow("")
-    val matchWonEvent: StateFlow<String> = _matchWonEvent
+    private val _matchWonEvent = MutableSharedFlow<String>()
+    val matchWonEvent: SharedFlow<String> = _matchWonEvent.asSharedFlow()
 
     // Undo and Redo stacks
     private val undoStack = ArrayDeque<ScoreboardState>(10)
