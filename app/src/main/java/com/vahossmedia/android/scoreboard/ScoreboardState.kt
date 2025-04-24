@@ -8,5 +8,6 @@ data class ScoreboardState(
     val teamAScore: Int = 0,
     val teamBScore: Int = 0,
     val teamASets: Int = 0,
-    val teamBSets: Int = 0
+    val teamBSets: Int = 0,
+    val matchWinner: String? = null // "A", "B", or null
 ) : Parcelable

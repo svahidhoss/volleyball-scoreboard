@@ -128,7 +128,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     private fun checkSetAndMatchWinner() {
-        val currentState = _scoreboardState.value
+        var currentState = _scoreboardState.value
 
         // Check for set win
         if ((currentState.teamAScore >= WINNING_SCORE || currentState.teamBScore >= WINNING_SCORE) &&
@@ -148,17 +148,20 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
             // reset the set and don't save the score of 25
             resetSet(false)
         }
-
+        currentState = _scoreboardState.value
         // Check for match win
-        if (_scoreboardState.value.teamASets >= 3 || _scoreboardState.value.teamBSets >= 3) {
-            if (_scoreboardState.value.teamASets > _scoreboardState.value.teamBSets) {
-                viewModelScope.launch {
-                    _matchWonEvent.emit("Team A wins the match!")
-                }
-            } else {
-                viewModelScope.launch {
-                    _matchWonEvent.emit("Team B wins the match!")
-                }
+        val winner: String? = when {
+            currentState.teamASets >= 3 -> "A"
+            currentState.teamBSets >= 3 -> "B"
+            else -> null
+        }
+        // Only update if a team just won
+        if (winner != null && currentState.matchWinner == null) {
+            _scoreboardState.value = currentState.copy(matchWinner = winner)
+            viewModelScope.launch {
+                _matchWonEvent.emit(
+                    if (winner == "A") "Team A wins the match!" else "Team B wins the match!"
+                )
             }
         }
     }

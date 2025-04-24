@@ -64,7 +64,9 @@ class MainActivity : AppCompatActivity() {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle("Match Won!")
                         .setMessage("Results:\nTeam A: ${viewModel.scoreboardState.value.teamASets} sets, Team B: ${viewModel.scoreboardState.value.teamBSets} sets")
-                        .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                        .setPositiveButton("OK") { dialog, _ ->
+                            dialog.dismiss()
+                        }
                         .show()
                     // Play sound effect here
                     matchWinPlayer.start()

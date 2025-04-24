@@ -186,6 +186,9 @@ class MainActivityTest {
         onView(withId(R.id.textview_team_b_score)).check(matches(withText("0"))) // It should reset and increment sets
         onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("4"))))
         onView(withId(R.id.textview_team_a_sets)).check(matches(withText(containsString("0"))))
+
+        // Team A: 75 rapid increments
+        repeat(75) { onView(withId(R.id.team_a_score_area)).perform(click()) }
     }
 
     @Test
