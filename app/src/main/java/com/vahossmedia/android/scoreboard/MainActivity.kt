@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -90,6 +91,14 @@ class MainActivity : AppCompatActivity() {
         binding.textviewTeamBScore.text = "${state.teamBScore}"
         binding.textviewTeamASets.text = "Team A Sets: ${state.teamASets}"
         binding.textviewTeamBSets.text = "Team B Sets: ${state.teamBSets}"
+
+        if (state.matchWinner != null) {
+            binding.textviewWinner.text =
+                if (state.matchWinner == "A") "Winner: Team A!" else "Winner: Team B!"
+            binding.textviewWinner.visibility = View.VISIBLE
+        } else {
+            binding.textviewWinner.visibility = View.GONE
+        }
     }
 
     override fun onDestroy() {
