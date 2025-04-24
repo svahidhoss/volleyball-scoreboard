@@ -1,5 +1,6 @@
 package com.vahossmedia.android.scoreboard
 
+import android.media.MediaPlayer
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -15,10 +16,16 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: ScoreboardViewModel by viewModels()
 
+    private lateinit var setWinPlayer: MediaPlayer
+    private lateinit var matchWinPlayer: MediaPlayer
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setWinPlayer = MediaPlayer.create(this, R.raw.marimba_win_sound)
+        matchWinPlayer = MediaPlayer.create(this, R.raw.marimba_win_sound3)
 
         // Set up click listeners
         binding.teamAScoreArea.setOnClickListener { viewModel.incrementScore("A") }
@@ -59,7 +66,8 @@ class MainActivity : AppCompatActivity() {
                         .setMessage("Results:\nTeam A: ${viewModel.scoreboardState.value.teamASets} sets, Team B: ${viewModel.scoreboardState.value.teamBSets} sets")
                         .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                         .show()
-                    // TODO: Play sound effect here
+                    // Play sound effect here
+                    matchWinPlayer.start()
                 }
             }
         }
@@ -68,7 +76,8 @@ class MainActivity : AppCompatActivity() {
             viewModel.setWonEvent.collect { message ->
                 if (message.isNotEmpty()) {
                     Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                    // TODO: Play sound effect here
+                    // Play sound effect here
+                    setWinPlayer.start()
                 }
             }
         }
@@ -79,5 +88,11 @@ class MainActivity : AppCompatActivity() {
         binding.textviewTeamBScore.text = "${state.teamBScore}"
         binding.textviewTeamASets.text = "Team A Sets: ${state.teamASets}"
         binding.textviewTeamBSets.text = "Team B Sets: ${state.teamBSets}"
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        setWinPlayer.release()
+        matchWinPlayer.release()
     }
 }
