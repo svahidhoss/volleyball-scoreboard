@@ -54,10 +54,10 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         viewModelScope.launch {
             val currentState = _scoreboardState.value
-            if (team == "A") {
-                _scoreboardState.value = currentState.copy(teamAScore = currentState.teamAScore + 1)
-            } else if (team == "B") {
-                _scoreboardState.value = currentState.copy(teamBScore = currentState.teamBScore + 1)
+            _scoreboardState.value = when (team) {
+                "A" -> currentState.copy(teamAScore = currentState.teamAScore + 1)
+                "B" -> currentState.copy(teamBScore = currentState.teamBScore + 1)
+                else -> currentState
             }
             savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
 
@@ -87,6 +87,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
 
     fun redo() {
         if (redoStack.isNotEmpty()) {
+            saveStateForUndo()
             // Restore next state
             val nextState = redoStack.removeLast()
             _scoreboardState.value = nextState
@@ -105,7 +106,6 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
      */
     private fun saveStateForUndo() {
         if (undoStack.size >= 10) undoStack.removeFirst()
-
         undoStack.add(_scoreboardState.value)
     }
 
@@ -143,7 +143,8 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
                     _setWonEvent.emit("Team B wins the set!")
                 }
             }
-            resetSet()
+            // reset the set and don't save the score of 25
+            resetSet(false)
         }
 
         // Check for match win
@@ -160,9 +161,9 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         }
     }
 
-    fun resetSet() {
+    fun resetSet(saveState: Boolean = true) {
         clearRedoStack()
-        saveStateForUndo()
+        if (saveState) saveStateForUndo()
         _scoreboardState.value = _scoreboardState.value.copy(teamAScore = 0, teamBScore = 0)
 
         // Update stored state and undo availability

@@ -250,8 +250,7 @@ class MainActivityTest {
         onView(withId(R.id.textview_team_a_score)).check(matches(withText("13")))
 
         // Undo twice
-        onView(withId(R.id.button_undo)).perform(click())
-        onView(withId(R.id.button_undo)).perform(click())
+        onView(withId(R.id.button_undo)).perform(click(), click())
         onView(withId(R.id.textview_team_a_score)).check(matches(withText("11")))
 
         // Redo once
@@ -260,6 +259,14 @@ class MainActivityTest {
 
         // Redo again
         onView(withId(R.id.button_redo)).perform(click())
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("13")))
+
+        // Undo twice
+        onView(withId(R.id.button_undo)).perform(click(), click())
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("11")))
+
+        // Redo twice
+        onView(withId(R.id.button_redo)).perform(click(), click())
         onView(withId(R.id.textview_team_a_score)).check(matches(withText("13")))
 
         // Redo should now be disabled (no more "future" states)
