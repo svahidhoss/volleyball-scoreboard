@@ -93,8 +93,8 @@ class MainActivityTest {
         // After reset
         onView(withId(R.id.team_b_score_area)).perform(click())
         onView(withId(R.id.button_reset_match)).perform(click())
-        // TODO check this behaviour is wanted
-        // onView(withId(R.id.button_undo)).check(matches(not(isEnabled())))
+        // check if this behaviour is wanted: enabled or disabled?
+         onView(withId(R.id.button_undo)).check(matches(isEnabled()))
     }
 
     @Test

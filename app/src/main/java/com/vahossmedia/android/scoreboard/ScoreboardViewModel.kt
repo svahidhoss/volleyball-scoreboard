@@ -64,7 +64,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
             // Update undo availability
             _canUndo.value = undoStack.isNotEmpty()
 
-            checkSetWinner()
+            checkSetAndMatchWinner()
         }
     }
 
@@ -127,8 +127,10 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         _canRedo.value = false
     }
 
-    private fun checkSetWinner() {
+    private fun checkSetAndMatchWinner() {
         val currentState = _scoreboardState.value
+
+        // Check for set win
         if ((currentState.teamAScore >= WINNING_SCORE || currentState.teamBScore >= WINNING_SCORE) &&
             abs(currentState.teamAScore - currentState.teamBScore) >= 2
         ) {
@@ -167,7 +169,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         _scoreboardState.value = _scoreboardState.value.copy(teamAScore = 0, teamBScore = 0)
 
         // Update stored state and undo availability
-        savedStateHandle["scoreboardState"] = _scoreboardState.value
+        savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
         _canUndo.value = undoStack.isNotEmpty()
     }
 
@@ -177,7 +179,7 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         _scoreboardState.value = ScoreboardState()
 
         // Update stored state and undo availability
-        savedStateHandle["scoreboardState"] = _scoreboardState.value
+        savedStateHandle[CURRENT_BOARD_STATE_KEY] = _scoreboardState.value
         _canUndo.value = undoStack.isNotEmpty()
     }
 
