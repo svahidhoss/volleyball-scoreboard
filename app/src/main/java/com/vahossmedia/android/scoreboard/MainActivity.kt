@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
         if (state.matchWinner != null) {
             binding.textviewWinner.text =
-                if (state.matchWinner == "A") "Winner: Team A!" else "Winner: Team B!"
+                if (state.matchWinner == "A") "Winner:\nTeam A!" else "Winner:\nTeam B!"
             binding.textviewWinner.visibility = View.VISIBLE
         } else {
             binding.textviewWinner.visibility = View.GONE

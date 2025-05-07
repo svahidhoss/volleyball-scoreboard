@@ -116,7 +116,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="8dp"
-        tools:text="Winner: Team A!"
+        tools:text="Winner:\nTeam A!"
         android:textColor="@android:color/holo_green_dark"
         android:textSize="24sp"
         android:textStyle="bold"
