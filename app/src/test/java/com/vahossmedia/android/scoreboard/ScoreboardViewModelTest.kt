@@ -103,7 +103,7 @@ class ScoreboardViewModelTest {
         assertEquals(3, viewModel.scoreboardState.value.teamASets)
         assertEquals(0, viewModel.scoreboardState.value.teamBSets)
 
-        assertEquals("Team A wins the match!", viewModel.matchWonEvent.value)
+        assertEquals("Team A wins the match!", viewModel.matchWonEvent.replayCache.firstOrNull())
     }
 
     @Test
@@ -118,7 +118,7 @@ class ScoreboardViewModelTest {
 
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals("Team B wins the match!", viewModel.matchWonEvent.value)
+        assertEquals("Team B wins the match!", viewModel.matchWonEvent.replayCache.firstOrNull())
 
         // Reset the game
         viewModel.resetMatch()
