@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Landscape: the two teams side by side. Portrait stacks them (layout/activity_main.xml). -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Scoreboard: fills the whole screen, behind the system bars (edge-to-edge).
+         Declared first so the labels and buttons below draw on top of it. -->
+    <LinearLayout
+        android:id="@+id/scoreboard_area"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Team A Score -->
+        <LinearLayout
+            android:id="@+id/team_a_score_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#B84023"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textview_team_a_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="120sp"
+                tools:text="0" />
+
+        </LinearLayout>
+
+        <!-- Team B Score -->
+        <LinearLayout
+            android:id="@+id/team_b_score_area"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#0191A0"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textview_team_b_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="120sp"
+                tools:text="0" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom edge of the status bar; set in code from the window insets -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="0dp" />
+
+    <!-- Top Section: Team Names and Sets Won -->
+    <TextView
+        android:id="@+id/textview_team_a_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Team A Sets: 0"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/textview_team_b_sets"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_top"
+        app:layout_constraintWidth_percent="0.5" />
+
+    <TextView
+        android:id="@+id/textview_team_b_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Team B Sets: 0"
+        android:textAlignment="textEnd"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textview_team_a_sets"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_top"
+        app:layout_constraintWidth_percent="0.5" />
+
+    <Button
+        android:id="@+id/button_undo"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:layout_weight="1"
+        android:text="@string/undo"
+        app:icon="@drawable/undo"
+        app:iconGravity="start"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets" />
+
+    <Button
+        android:id="@+id/button_redo"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:layout_weight="1"
+        android:text="@string/redo"
+        app:icon="@drawable/redo"
+        app:iconGravity="end"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets" />
+
+    <TextView
+        android:id="@+id/textview_winner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        tools:text="Winner:\nTeam A!"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/button_redo"
+        app:layout_constraintStart_toEndOf="@+id/button_undo"
+        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets"
+        tools:visibility="visible" />
+
+    <!-- Bottom Section: Reset Buttons -->
+    <LinearLayout
+        android:id="@+id/reset_buttons_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/button_reset_set"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="@string/reset_set" />
+
+        <Button
+            android:id="@+id/button_reset_match"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:text="@string/reset_match" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

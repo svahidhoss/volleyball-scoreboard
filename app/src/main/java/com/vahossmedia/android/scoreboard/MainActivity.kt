@@ -103,7 +103,8 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * The team colours run edge to edge; this keeps the set labels and buttons clear of the
-     * system bars and the display cutout.
+     * system bars and the display cutout. Works for both the portrait and landscape layouts:
+     * the top controls hang from guideline_top, which is moved below the status bar.
      */
     private fun applyWindowInsets() {
         val labelPadding = (12 * resources.displayMetrics.density).roundToInt()
@@ -113,11 +114,12 @@ class MainActivity : AppCompatActivity() {
             val insets = windowInsets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
+            binding.guidelineTop.setGuidelineBegin(insets.top)
             binding.textviewTeamASets.updatePadding(
-                left = labelPadding + insets.left, top = insets.top, right = labelPadding
+                left = labelPadding + insets.left, right = labelPadding + insets.right
             )
             binding.textviewTeamBSets.updatePadding(
-                left = labelPadding, top = insets.top, right = labelPadding + insets.right
+                left = labelPadding + insets.left, right = labelPadding + insets.right
             )
             binding.buttonUndo.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = buttonMargin + insets.left

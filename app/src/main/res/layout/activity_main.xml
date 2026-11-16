@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Portrait: Team A on top, Team B below. Landscape puts them side by side (layout-land/). -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,8 +12,7 @@
         android:id="@+id/scoreboard_area"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:baselineAligned="false"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,8 +21,8 @@
         <!-- Team A Score -->
         <LinearLayout
             android:id="@+id/team_a_score_area"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:background="#B84023"
             android:gravity="center"
@@ -41,8 +41,8 @@
         <!-- Team B Score -->
         <LinearLayout
             android:id="@+id/team_b_score_area"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
             android:background="#0191A0"
             android:gravity="center"
@@ -60,30 +60,23 @@
 
     </LinearLayout>
 
-    <!-- Top Section: Team Names and Sets Won (top padding for the status bar is set in code) -->
-    <TextView
-        android:id="@+id/textview_team_a_sets"
-        android:layout_width="0dp"
+    <!-- Bottom edge of the status bar; set in code from the window insets -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Team A Sets: 0"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toStartOf="@+id/textview_team_b_sets"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.5" />
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="0dp" />
 
-    <TextView
-        android:id="@+id/textview_team_b_sets"
-        android:layout_width="0dp"
+    <!-- Where Team A's half ends and Team B's begins -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_middle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Team B Sets: 0"
-        android:textAlignment="textEnd"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textview_team_a_sets"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="0.5" />
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
 
+    <!-- Top Section: Undo / Redo and the winner message -->
     <Button
         android:id="@+id/button_undo"
         style="?android:attr/buttonBarStyle"
@@ -95,7 +88,7 @@
         app:icon="@drawable/undo"
         app:iconGravity="start"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets" />
+        app:layout_constraintTop_toBottomOf="@+id/guideline_top" />
 
     <Button
         android:id="@+id/button_redo"
@@ -108,7 +101,7 @@
         app:icon="@drawable/redo"
         app:iconGravity="end"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets" />
+        app:layout_constraintTop_toBottomOf="@+id/guideline_top" />
 
     <TextView
         android:id="@+id/textview_winner"
@@ -123,8 +116,39 @@
         android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@+id/button_redo"
         app:layout_constraintStart_toEndOf="@+id/button_undo"
-        app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_top"
         tools:visibility="visible" />
+
+    <!-- Below whichever is taller: the buttons, or the winner message when it's shown -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_top_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierAllowsGoneWidgets="false"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="button_undo,button_redo,textview_winner" />
+
+    <!-- Each team's sets, inside its own half -->
+    <TextView
+        android:id="@+id/textview_team_a_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Team A Sets: 0"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier_top_controls" />
+
+    <TextView
+        android:id="@+id/textview_team_b_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:text="Team B Sets: 0"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline_middle" />
 
     <!-- Bottom Section: Reset Buttons -->
     <LinearLayout
