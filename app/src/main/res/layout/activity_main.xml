@@ -150,34 +150,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline_middle" />
 
-    <!-- Bottom Section: Reset Buttons -->
-    <LinearLayout
-        android:id="@+id/reset_buttons_area"
-        android:layout_width="match_parent"
+    <!-- Splits the reset buttons evenly across the screen -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_center"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <!-- Bottom Section: Reset Buttons (outer and bottom margins for the system bars are set in code) -->
+    <Button
+        android:id="@+id/button_reset_set"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:text="@string/reset_set"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_center"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_reset_match"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:text="@string/reset_match"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/button_reset_set"
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:layout_weight="1"
-            android:text="@string/reset_set" />
-
-        <Button
-            android:id="@+id/button_reset_match"
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:layout_weight="1"
-            android:text="@string/reset_match" />
-
-    </LinearLayout>
+        app:layout_constraintStart_toEndOf="@+id/guideline_center" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

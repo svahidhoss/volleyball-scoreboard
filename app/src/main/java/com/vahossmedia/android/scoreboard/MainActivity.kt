@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Draw behind the status and navigation bars. Light icons read best on the team colours.
+        // Draw behind the status and navigation bars. Light icons read best on the team colors.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * The team colours run edge to edge; this keeps the set labels and buttons clear of the
+     * The team colors run edge to edge; this keeps the set labels and buttons clear of the
      * system bars and the display cutout. Works for both the portrait and landscape layouts:
      * the top controls hang from guideline_top, which is moved below the status bar.
      */
@@ -127,9 +127,15 @@ class MainActivity : AppCompatActivity() {
             binding.buttonRedo.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 rightMargin = buttonMargin + insets.right
             }
-            binding.resetButtonsArea.updatePadding(
-                left = insets.left, right = insets.right, bottom = insets.bottom
-            )
+            // Only the outer edge of each reset button moves, so they still meet at the middle
+            binding.buttonResetSet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = buttonMargin + insets.left
+                bottomMargin = buttonMargin + insets.bottom
+            }
+            binding.buttonResetMatch.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                rightMargin = buttonMargin + insets.right
+                bottomMargin = buttonMargin + insets.bottom
+            }
             windowInsets
         }
     }
