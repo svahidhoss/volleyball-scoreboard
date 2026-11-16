@@ -51,20 +51,25 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         // Save current state for undo
         saveStateForUndo()
 
-        viewModelScope.launch {
-            val currentState = _scoreboardState.value
-            val incrementedState = when (team) {
-                "A" -> currentState.copy(teamAScore = currentState.teamAScore + 1)
-                "B" -> currentState.copy(teamBScore = currentState.teamBScore + 1)
-                else -> currentState
+        val currentState = _scoreboardState.value
+        val incrementedState = when (team) {
+            "A" -> currentState.copy(teamAScore = currentState.teamAScore + 1)
+            "B" -> currentState.copy(teamBScore = currentState.teamBScore + 1)
+            else -> currentState
+        }
+
+        val (newState, setWinMsg, matchWinMsg) = checkSetAndMatchWinner(incrementedState)
+        _scoreboardState.value = newState
+        savedStateHandle[CURRENT_BOARD_STATE_KEY] = newState
+        // Update undo availability
+        _canUndo.value = undoStack.isNotEmpty()
+
+        // Only pay coroutine cost when a set or match was actually won (rare)
+        if (setWinMsg != null || matchWinMsg != null) {
+            viewModelScope.launch {
+                setWinMsg?.let { _setWonEvent.emit(it) }
+                matchWinMsg?.let { _matchWonEvent.emit(it) }
             }
-
-            val afterSetAndMatchCheck = checkSetAndMatchWinner(incrementedState)
-            _scoreboardState.value = afterSetAndMatchCheck
-            savedStateHandle[CURRENT_BOARD_STATE_KEY] = afterSetAndMatchCheck
-
-            // Update undo availability
-            _canUndo.value = undoStack.isNotEmpty()
         }
     }
 
@@ -123,36 +128,35 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
      * like incrementScore, resetSet or resetMatch
      */
     private fun clearRedoStack() {
-        redoStack.clear()
-        _canRedo.value = false
+        if (redoStack.isNotEmpty()) {
+            redoStack.clear()
+            _canRedo.value = false
+        }
     }
 
-    private fun checkSetAndMatchWinner(state: ScoreboardState): ScoreboardState {
+    private data class SetCheckResult(
+        val state: ScoreboardState,
+        val setWinMsg: String?,
+        val matchWinMsg: String?
+    )
+
+    private fun checkSetAndMatchWinner(state: ScoreboardState): SetCheckResult {
         val aWins = state.teamAScore >= WINNING_SCORE && state.teamAScore - state.teamBScore >= 2
         val bWins = state.teamBScore >= WINNING_SCORE && state.teamBScore - state.teamAScore >= 2
 
         var updatedState = state
+        var setWinMsg: String? = null
+        var matchWinMsg: String? = null
 
-        // Check for set win
         if (aWins || bWins) {
+            setWinMsg = if (aWins) "Team A wins the set!" else "Team B wins the set!"
             updatedState = if (aWins) {
-                viewModelScope.launch { _setWonEvent.emit("Team A wins the set!") }
-                updatedState.copy(
-                    teamAScore = 0,
-                    teamBScore = 0,
-                    teamASets = updatedState.teamASets + 1
-                )
+                updatedState.copy(teamAScore = 0, teamBScore = 0, teamASets = updatedState.teamASets + 1)
             } else {
-                viewModelScope.launch { _setWonEvent.emit("Team B wins the set!") }
-                updatedState.copy(
-                    teamAScore = 0,
-                    teamBScore = 0,
-                    teamBSets = updatedState.teamBSets + 1
-                )
+                updatedState.copy(teamAScore = 0, teamBScore = 0, teamBSets = updatedState.teamBSets + 1)
             }
         }
 
-        // Check for match win
         if (updatedState.matchWinner == null) {
             val matchWinner = when {
                 updatedState.teamASets >= 3 -> "A"
@@ -162,13 +166,11 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
             // Only update if a team just won
             if (matchWinner != null) {
                 updatedState = updatedState.copy(matchWinner = matchWinner)
-                viewModelScope.launch {
-                    _matchWonEvent.emit("Team $matchWinner wins the match!")
-                }
+                matchWinMsg = "Team $matchWinner wins the match!"
             }
         }
 
-        return updatedState
+        return SetCheckResult(updatedState, setWinMsg, matchWinMsg)
     }
 
     fun resetSet(saveState: Boolean = true) {
