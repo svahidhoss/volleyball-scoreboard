@@ -113,3 +113,6 @@ DerivedData
 *.xcuserstate
 *.xcscmblueprint
 .build
+
+# Docs
+/docs/
