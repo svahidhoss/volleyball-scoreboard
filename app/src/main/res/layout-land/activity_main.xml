@@ -135,6 +135,26 @@
         app:layout_constraintTop_toBottomOf="@+id/textview_team_a_sets"
         tools:visibility="visible" />
 
+    <!-- Shown during the deciding 5th set (2–2 in sets). Shares the winner's spot; the two are
+         never visible together. Text is set in code from POINTS_TO_WIN_DECIDING_SET.
+         Centred on the border between the two team halves (guideline_center). -->
+    <TextView
+        android:id="@+id/textview_deciding_set"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/button_undo"
+        app:layout_constraintEnd_toEndOf="@+id/guideline_center"
+        app:layout_constraintStart_toStartOf="@+id/guideline_center"
+        app:layout_constraintTop_toTopOf="@+id/button_undo"
+        tools:text="Deciding set · to 15"
+        tools:visibility="visible" />
+
     <!-- Splits the reset buttons at the border between the two team halves -->
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline_center"

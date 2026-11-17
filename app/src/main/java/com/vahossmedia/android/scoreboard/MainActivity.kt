@@ -51,6 +51,9 @@ class MainActivity : AppCompatActivity() {
         binding.buttonRedo.setOnClickListener { viewModel.redo() }
 
         binding.buttonResetSet.setOnClickListener { viewModel.resetSet() }
+
+        binding.textviewDecidingSet.text =
+            getString(R.string.deciding_set_hint, POINTS_TO_WIN_DECIDING_SET)
         binding.buttonResetMatch.setOnClickListener { viewModel.resetMatch() }
 
         // Observe state changes
@@ -153,6 +156,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.textviewWinner.visibility = View.GONE
         }
+
+        binding.textviewDecidingSet.visibility =
+            if (state.isDecidingSet) View.VISIBLE else View.GONE
     }
 
     override fun onDestroy() {

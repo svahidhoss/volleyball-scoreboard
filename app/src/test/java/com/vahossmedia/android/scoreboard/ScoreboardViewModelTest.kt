@@ -558,6 +558,40 @@ class ScoreboardViewModelTest {
         assertNull(viewModel.scoreboardState.value.matchWinner)
     }
 
+    /**
+     * isDecidingSet is only true at 2–2 in sets: not at the start of the match and not at 2–1.
+     */
+    @Test
+    fun isDecidingSetOnlyAtTwoSetsAll() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        assertFalse(viewModel.scoreboardState.value.isDecidingSet)
+
+        winSet(viewModel, "A")
+        winSet(viewModel, "B")
+        winSet(viewModel, "A")
+        assertFalse(viewModel.scoreboardState.value.isDecidingSet)
+
+        winSet(viewModel, "B")
+        assertTrue(viewModel.scoreboardState.value.isDecidingSet)
+    }
+
+    /**
+     * Winning the deciding set ends it (3–2, so no longer deciding); undoing the winning point
+     * makes it the deciding set again.
+     */
+    @Test
+    fun decidingSetEndsWhenWonAndReturnsOnUndo() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        reachDecidingSet(viewModel)
+        addPoints(viewModel, "B", 13)
+        addPoints(viewModel, "A", 15)
+        assertFalse(viewModel.scoreboardState.value.isDecidingSet)
+
+        viewModel.undo()
+
+        assertTrue(viewModel.scoreboardState.value.isDecidingSet)
+    }
+
     /** Scores [points] for [team], one point at a time. */
     private fun addPoints(viewModel: ScoreboardViewModel, team: String, points: Int) =
         repeat(points) { viewModel.incrementScore(team) }

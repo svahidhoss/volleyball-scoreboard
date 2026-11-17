@@ -410,10 +410,7 @@ class MainActivityTest {
      */
     @Test
     fun decidingSetEndsAt15() {
-        addPoints("A", 25)
-        addPoints("B", 25)
-        addPoints("A", 25)
-        addPoints("B", 25)
+        reachDecidingSet()
         addPoints("B", 13)
         addPoints("A", 14)
         onView(withId(R.id.textview_team_a_score)).check(matches(withText("14")))
@@ -423,6 +420,51 @@ class MainActivityTest {
 
         onView(withId(R.id.textview_team_a_sets)).check(matches(withText(containsString("3"))))
         onView(withId(R.id.textview_winner)).check(matches(isDisplayed()))
+    }
+
+    /** The deciding-set hint is hidden at the start of a match. */
+    @Test
+    fun decidingSetHintIsHiddenAtStart() {
+        onView(withId(R.id.textview_deciding_set)).check(matches(not(isDisplayed())))
+    }
+
+    /**
+     * At 2–2 in sets the hint shows "Deciding set · to 15", and it is still shown after the
+     * screen is recreated (as on rotation).
+     */
+    @Test
+    fun decidingSetHintIsShownAtTwoSetsAllAndAfterRotation() {
+        reachDecidingSet()
+
+        onView(withId(R.id.textview_deciding_set))
+            .check(matches(isDisplayed()))
+            .check(matches(withText("Deciding set · to 15")))
+
+        scenario.recreate()
+
+        onView(withId(R.id.textview_deciding_set)).check(matches(isDisplayed()))
+    }
+
+    /** Winning the deciding set hides the hint and shows the winner text in its place. */
+    @Test
+    fun decidingSetHintIsHiddenAfterTheMatchIsWon() {
+        reachDecidingSet()
+        addPoints("B", 13)
+        addPoints("A", 14)
+
+        onView(withId(R.id.team_a_score_area)).perform(click())
+        dismissMatchWonDialog()
+
+        onView(withId(R.id.textview_deciding_set)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.textview_winner)).check(matches(isDisplayed()))
+    }
+
+    /** Wins two sets each (A, B, A, B) through the ViewModel, so the next set is the deciding set. */
+    private fun reachDecidingSet() {
+        addPoints("A", 25)
+        addPoints("B", 25)
+        addPoints("A", 25)
+        addPoints("B", 25)
     }
 
     /**

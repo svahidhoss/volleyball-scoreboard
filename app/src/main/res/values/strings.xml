@@ -4,4 +4,6 @@
     <string name="redo">Redo</string>
     <string name="reset_match">Reset Match</string>
     <string name="reset_set">Reset Set</string>
+    <!-- Shown during the deciding 5th set; %1$d is the points needed (15) -->
+    <string name="deciding_set_hint">Deciding set · to %1$d</string>
 </resources>

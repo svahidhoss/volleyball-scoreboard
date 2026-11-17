@@ -119,14 +119,33 @@
         app:layout_constraintTop_toBottomOf="@+id/guideline_top"
         tools:visibility="visible" />
 
-    <!-- Below whichever is taller: the buttons, or the winner message when it's shown -->
+    <!-- Shown during the deciding 5th set (2–2 in sets). Shares the winner's spot; the two are
+         never visible together. Text is set in code from POINTS_TO_WIN_DECIDING_SET. -->
+    <TextView
+        android:id="@+id/textview_deciding_set"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/button_undo"
+        app:layout_constraintEnd_toStartOf="@+id/button_redo"
+        app:layout_constraintStart_toEndOf="@+id/button_undo"
+        app:layout_constraintTop_toTopOf="@+id/button_undo"
+        tools:text="Deciding set · to 15"
+        tools:visibility="visible" />
+
+    <!-- Below whichever is tallest: the buttons, or the winner / deciding-set text when shown -->
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/barrier_top_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierAllowsGoneWidgets="false"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="button_undo,button_redo,textview_winner" />
+        app:constraint_referenced_ids="button_undo,button_redo,textview_winner,textview_deciding_set" />
 
     <!-- Each team's sets, inside its own half -->
     <TextView
