@@ -408,6 +408,82 @@ class ScoreboardViewModelTest {
         assertEquals(emptyList<String>(), secondScreen)
     }
 
+    /**
+     * Once a team has won the match, tapping either team's score area changes nothing:
+     * scores, sets and the winner stay exactly as they were.
+     */
+    @Test
+    fun scoringIsIgnoredAfterMatchIsWon() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        winMatch(viewModel, "A")
+        testDispatcher.scheduler.advanceUntilIdle()
+        val wonState = viewModel.scoreboardState.value
+
+        viewModel.incrementScore("A")
+        viewModel.incrementScore("B")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(wonState, viewModel.scoreboardState.value)
+        assertEquals("A", viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /**
+     * A tap that is ignored because the match is over must not push an undo step: a single
+     * Undo goes straight back to just before the winning point (24–0 in the third set).
+     */
+    @Test
+    fun ignoredTapAfterMatchDoesNotAddAnUndoStep() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        winMatch(viewModel, "A")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.incrementScore("A") // ignored
+        viewModel.undo()
+
+        // A single undo goes straight back to just before the winning point
+        assertEquals(24, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(2, viewModel.scoreboardState.value.teamASets)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /**
+     * Undoing the winning point clears the match winner, so scoring works again from
+     * 24–0 in the third set.
+     */
+    @Test
+    fun undoingTheWinningPointAllowsScoringAgain() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        winMatch(viewModel, "A")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.undo()
+        viewModel.incrementScore("B")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(24, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(1, viewModel.scoreboardState.value.teamBScore)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /**
+     * Reset Match after a win starts a fresh match: the winner and sets are cleared and
+     * the next tap scores normally.
+     */
+    @Test
+    fun resetMatchAfterWinAllowsScoringAgain() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        winMatch(viewModel, "B")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.resetMatch()
+        viewModel.incrementScore("A")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(0, viewModel.scoreboardState.value.teamBSets)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+    }
+
     /** Scores 25 straight points for [team], winning one set 25–0. */
     private fun winSet(viewModel: ScoreboardViewModel, team: String) =
         repeat(25) { viewModel.incrementScore(team) }

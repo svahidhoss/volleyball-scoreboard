@@ -1,5 +1,6 @@
 package com.vahossmedia.android.scoreboard
 
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -177,18 +178,14 @@ class MainActivityTest {
         onView(withText(containsString("Team B: 3 sets"))).check(matches(isDisplayed()))
         onView(withText("OK")).perform(click())
 
-        // Team B: 25 rapid increments
+        // The match is over: keep hammering both teams, every tap must be ignored
         winASetForTeamB()
+        repeat(25) { onView(withId(R.id.team_a_score_area)).perform(click()) }
 
-        // You can check for set wins, sets increment, and score resets,
-        // but let's just check that the UI remains consistent.
-        // (If app supports unlimited sets, this is fine.)
-        onView(withId(R.id.textview_team_b_score)).check(matches(withText("0"))) // It should reset and increment sets
-        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("4"))))
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("0")))
+        onView(withId(R.id.textview_team_b_score)).check(matches(withText("0")))
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("3"))))
         onView(withId(R.id.textview_team_a_sets)).check(matches(withText(containsString("0"))))
-
-        // Team A: 75 rapid increments
-        repeat(75) { onView(withId(R.id.team_a_score_area)).perform(click()) }
     }
 
     @Test
@@ -335,6 +332,85 @@ class MainActivityTest {
 
         // Redo should now be disabled (cleared!)
         onView(withId(R.id.button_redo)).check(matches(not(isEnabled())))
+    }
+
+    /**
+     * After the match is won, tapping either score area changes nothing on screen:
+     * both scores stay 0, and Team B keeps its 3 sets and the winner text.
+     */
+    @Test
+    fun tapsAfterMatchWinDoNotChangeScore() {
+        winMatchForTeamB()
+        dismissMatchWonDialog()
+
+        onView(withId(R.id.team_a_score_area)).perform(click())
+        onView(withId(R.id.team_b_score_area)).perform(click())
+
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("0")))
+        onView(withId(R.id.textview_team_b_score)).check(matches(withText("0")))
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("3"))))
+        onView(withId(R.id.textview_winner)).check(matches(isDisplayed()))
+    }
+
+    /**
+     * Undo after the match is won goes back to 24–0 in the third set (2 sets, no winner).
+     * The next point wins the match again and shows the dialog again.
+     */
+    @Test
+    fun undoAfterMatchWinAllowsScoringAgain() {
+        winMatchForTeamB()
+        dismissMatchWonDialog()
+
+        onView(withId(R.id.button_undo)).perform(click())
+        onView(withId(R.id.textview_team_b_score)).check(matches(withText("24")))
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("2"))))
+        onView(withId(R.id.textview_winner)).check(matches(not(isDisplayed())))
+
+        onView(withId(R.id.team_b_score_area)).perform(click())
+        dismissMatchWonDialog()
+    }
+
+    /**
+     * Reset Match after a win starts a new match: the winner text disappears, sets go back
+     * to 0 and the next tap scores normally.
+     */
+    @Test
+    fun resetMatchAfterWinStartsNewMatch() {
+        winMatchForTeamB()
+        dismissMatchWonDialog()
+
+        onView(withId(R.id.button_reset_match)).perform(click())
+        onView(withId(R.id.team_a_score_area)).perform(click())
+
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("1")))
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("0"))))
+        onView(withId(R.id.textview_winner)).check(matches(not(isDisplayed())))
+    }
+
+    /**
+     * Adds [points] for [team] straight through the Activity's own ViewModel: fast test setup
+     * without one Espresso click per point.
+     */
+    private fun addPoints(team: String, points: Int) {
+        scenario.onActivity { activity ->
+            val viewModel = ViewModelProvider(activity)[ScoreboardViewModel::class.java]
+            repeat(points) { viewModel.incrementScore(team) }
+        }
+    }
+
+    /**
+     * Takes Team B to match point (2 sets, 24–0) instantly, then wins the match with a real
+     * tap on its score area, so the dialog appears through the normal UI path.
+     */
+    private fun winMatchForTeamB() {
+        addPoints("B", 74)
+        onView(withId(R.id.team_b_score_area)).perform(click())
+    }
+
+    /** Checks the "Match Won!" dialog is showing and closes it with OK. */
+    private fun dismissMatchWonDialog() {
+        onView(withText("Match Won!")).check(matches(isDisplayed()))
+        onView(withText("OK")).perform(click())
     }
 
     /**

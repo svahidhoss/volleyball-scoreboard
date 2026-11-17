@@ -47,6 +47,9 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     }
 
     fun incrementScore(team: String) {
+        // The match is over: ignore taps until Undo or Reset Match
+        if (_scoreboardState.value.matchWinner != null) return
+
         clearRedoStack()
         // Save current state for undo
         saveStateForUndo()
