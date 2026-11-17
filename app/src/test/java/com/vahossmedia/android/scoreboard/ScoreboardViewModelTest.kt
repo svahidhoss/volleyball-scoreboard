@@ -3,8 +3,13 @@ package com.vahossmedia.android.scoreboard
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
@@ -37,7 +42,7 @@ class ScoreboardViewModelTest {
     }
 
     @Test
-    fun testIncrementScoreAndCheckSetValuesForTeamA() {
+    fun testIncrementScoreAndCheckSetValuesForTeamA() = runTest(testDispatcher) {
         val savedStateHandle = SavedStateHandle()
         val viewModel = ScoreboardViewModel(savedStateHandle)
 
@@ -61,12 +66,12 @@ class ScoreboardViewModelTest {
         assertEquals(0, viewModel.scoreboardState.value.teamBScore)
 
         // Check Won Event value
-        val setWonMessage = viewModel.setWonEvent.replayCache.firstOrNull()
+        val setWonMessage = viewModel.setWonEvent.first()
         assertEquals("Team A wins the set!", setWonMessage)
     }
 
     @Test
-    fun testIncrementScoreAndCheckSetValuesForTeamB() {
+    fun testIncrementScoreAndCheckSetValuesForTeamB() = runTest(testDispatcher) {
         val savedStateHandle = SavedStateHandle()
         val viewModel = ScoreboardViewModel(savedStateHandle)
 
@@ -83,12 +88,12 @@ class ScoreboardViewModelTest {
         assertEquals(0, viewModel.scoreboardState.value.teamBScore)
 
         // Check Won Event value
-        val setWonMessage = viewModel.setWonEvent.replayCache.firstOrNull()
+        val setWonMessage = viewModel.setWonEvent.first()
         assertEquals("Team B wins the set!", setWonMessage)
     }
 
     @Test
-    fun testIncrementScoreAndCheckGameWin() {
+    fun testIncrementScoreAndCheckGameWin() = runTest(testDispatcher) {
         val savedStateHandle = SavedStateHandle()
         val viewModel = ScoreboardViewModel(savedStateHandle)
 
@@ -103,11 +108,11 @@ class ScoreboardViewModelTest {
         assertEquals(3, viewModel.scoreboardState.value.teamASets)
         assertEquals(0, viewModel.scoreboardState.value.teamBSets)
 
-        assertEquals("Team A wins the match!", viewModel.matchWonEvent.replayCache.firstOrNull())
+        assertEquals("Team A wins the match!", viewModel.matchWonEvent.first())
     }
 
     @Test
-    fun testResetGame() {
+    fun testResetGame() = runTest(testDispatcher) {
         val savedStateHandle = SavedStateHandle()
         val viewModel = ScoreboardViewModel(savedStateHandle)
 
@@ -118,7 +123,7 @@ class ScoreboardViewModelTest {
 
         testDispatcher.scheduler.advanceUntilIdle()
 
-        assertEquals("Team B wins the match!", viewModel.matchWonEvent.replayCache.firstOrNull())
+        assertEquals("Team B wins the match!", viewModel.matchWonEvent.first())
 
         // Reset the game
         viewModel.resetMatch()
@@ -348,5 +353,66 @@ class ScoreboardViewModelTest {
         assertEquals(3, viewModel.scoreboardState.value.teamAScore)
     }
 
+    /**
+     * The match-won event is a one-time event: once a screen has received it, a new screen
+     * (e.g. the Activity recreated after a rotation) must not receive it again, so the
+     * "Match Won!" dialog and sound are not repeated.
+     */
+    @Test
+    fun matchWonEventIsNotDeliveredAgainToANewCollector() = runTest(testDispatcher) {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
 
+        // The first Activity sees the match win once
+        val firstScreen = mutableListOf<String>()
+        val firstCollector = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.matchWonEvent.collect { firstScreen.add(it) }
+        }
+        winMatch(viewModel, "A")
+        advanceUntilIdle()
+        assertEquals(listOf("Team A wins the match!"), firstScreen)
+
+        // Rotation: the old Activity stops collecting and a new one starts
+        firstCollector.cancel()
+        val secondScreen = mutableListOf<String>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.matchWonEvent.collect { secondScreen.add(it) }
+        }
+        advanceUntilIdle()
+
+        assertEquals(emptyList<String>(), secondScreen)
+    }
+
+    /**
+     * The set-won event is a one-time event: after a rotation, the recreated Activity must not
+     * receive it again, so the "wins the set" toast and sound are not repeated.
+     */
+    @Test
+    fun setWonEventIsNotDeliveredAgainToANewCollector() = runTest(testDispatcher) {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+
+        val firstScreen = mutableListOf<String>()
+        val firstCollector = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.setWonEvent.collect { firstScreen.add(it) }
+        }
+        winSet(viewModel, "B")
+        advanceUntilIdle()
+        assertEquals(listOf("Team B wins the set!"), firstScreen)
+
+        firstCollector.cancel()
+        val secondScreen = mutableListOf<String>()
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.setWonEvent.collect { secondScreen.add(it) }
+        }
+        advanceUntilIdle()
+
+        assertEquals(emptyList<String>(), secondScreen)
+    }
+
+    /** Scores 25 straight points for [team], winning one set 25–0. */
+    private fun winSet(viewModel: ScoreboardViewModel, team: String) =
+        repeat(25) { viewModel.incrementScore(team) }
+
+    /** Wins three straight sets for [team], which wins the match. */
+    private fun winMatch(viewModel: ScoreboardViewModel, team: String) =
+        repeat(3) { winSet(viewModel, team) }
 }

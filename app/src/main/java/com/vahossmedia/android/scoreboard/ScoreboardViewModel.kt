@@ -3,14 +3,12 @@ package com.vahossmedia.android.scoreboard
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.receiveAsFlow
 
 private const val TAG = "VolleyballViewModel"
 const val CURRENT_BOARD_STATE_KEY = "CURRENT_BOARD_STATE_KEY"
@@ -25,12 +23,14 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     )
     val scoreboardState: StateFlow<ScoreboardState> = _scoreboardState.asStateFlow()
 
-    // Events
-    private val _setWonEvent = MutableSharedFlow<String>(replay = 1)
-    val setWonEvent: SharedFlow<String> = _setWonEvent.asSharedFlow()
+    // One-time events: each is delivered once and never replayed, so a recreated Activity
+    // (e.g. after a rotation) doesn't show the toast/dialog or play the sound again.
+    // Buffered, so an event sent while no screen is collecting waits for the next one.
+    private val _setWonEvent = Channel<String>(Channel.BUFFERED)
+    val setWonEvent: Flow<String> = _setWonEvent.receiveAsFlow()
 
-    private val _matchWonEvent = MutableSharedFlow<String>(replay = 1)
-    val matchWonEvent: SharedFlow<String> = _matchWonEvent.asSharedFlow()
+    private val _matchWonEvent = Channel<String>(Channel.BUFFERED)
+    val matchWonEvent: Flow<String> = _matchWonEvent.receiveAsFlow()
 
     // Undo and Redo stacks
     private val undoStack = ArrayDeque<ScoreboardState>(10)
@@ -64,13 +64,10 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
         // Update undo availability
         _canUndo.value = undoStack.isNotEmpty()
 
-        // Only pay coroutine cost when a set or match was actually won (rare)
-        if (setWinMsg != null || matchWinMsg != null) {
-            viewModelScope.launch {
-                setWinMsg?.let { _setWonEvent.emit(it) }
-                matchWinMsg?.let { _matchWonEvent.emit(it) }
-            }
-        }
+        // Buffered channels accept events without waiting, so trySend works here without a coroutine.
+        // (It only fails if 64 events are already waiting unread, which can't happen in this app.)
+        setWinMsg?.let { _setWonEvent.trySend(it) }
+        matchWinMsg?.let { _matchWonEvent.trySend(it) }
     }
 
     fun undo() {
