@@ -484,6 +484,92 @@ class ScoreboardViewModelTest {
         assertNull(viewModel.scoreboardState.value.matchWinner)
     }
 
+    /**
+     * In the deciding 5th set (2–2 in sets) the target is 15, not 25: 15–13 wins the set
+     * and the match.
+     */
+    @Test
+    fun decidingSetIsWonAt15WithATwoPointLead() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        reachDecidingSet(viewModel)
+
+        addPoints(viewModel, "B", 13)
+        addPoints(viewModel, "A", 15)
+
+        assertEquals(3, viewModel.scoreboardState.value.teamASets)
+        assertEquals(2, viewModel.scoreboardState.value.teamBSets)
+        assertEquals("A", viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /**
+     * The deciding set still needs a 2-point lead: 15–14 doesn't win it, 16–14 does.
+     */
+    @Test
+    fun decidingSetNeedsATwoPointLead() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        reachDecidingSet(viewModel)
+
+        addPoints(viewModel, "A", 14)
+        addPoints(viewModel, "B", 14)
+        addPoints(viewModel, "A", 1)
+        assertEquals(15, viewModel.scoreboardState.value.teamAScore)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+
+        addPoints(viewModel, "A", 1)
+        assertEquals("A", viewModel.scoreboardState.value.matchWinner)
+        assertEquals(3, viewModel.scoreboardState.value.teamASets)
+    }
+
+    /**
+     * Sets before the deciding set still go to 25: at 2–1 in sets, reaching 15 points
+     * does not end the set.
+     */
+    @Test
+    fun setsBeforeTheDecidingSetStillGoTo25() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        winSet(viewModel, "A")
+        winSet(viewModel, "B")
+        winSet(viewModel, "A")
+
+        addPoints(viewModel, "B", 15)
+
+        assertEquals(15, viewModel.scoreboardState.value.teamBScore)
+        assertEquals(1, viewModel.scoreboardState.value.teamBSets)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /**
+     * Undo after winning the match 15–13 in the deciding set goes back to 14–13, still 2–2
+     * in sets, with no winner.
+     */
+    @Test
+    fun undoAfterDecidingSetWinGoesBackToTheLastPoint() {
+        val viewModel = ScoreboardViewModel(SavedStateHandle())
+        reachDecidingSet(viewModel)
+        addPoints(viewModel, "B", 13)
+        addPoints(viewModel, "A", 15)
+
+        viewModel.undo()
+
+        assertEquals(14, viewModel.scoreboardState.value.teamAScore)
+        assertEquals(13, viewModel.scoreboardState.value.teamBScore)
+        assertEquals(2, viewModel.scoreboardState.value.teamASets)
+        assertEquals(2, viewModel.scoreboardState.value.teamBSets)
+        assertNull(viewModel.scoreboardState.value.matchWinner)
+    }
+
+    /** Scores [points] for [team], one point at a time. */
+    private fun addPoints(viewModel: ScoreboardViewModel, team: String, points: Int) =
+        repeat(points) { viewModel.incrementScore(team) }
+
+    /** Wins two sets each (A, B, A, B), so the next set is the deciding 5th set. */
+    private fun reachDecidingSet(viewModel: ScoreboardViewModel) {
+        winSet(viewModel, "A")
+        winSet(viewModel, "B")
+        winSet(viewModel, "A")
+        winSet(viewModel, "B")
+    }
+
     /** Scores 25 straight points for [team], winning one set 25–0. */
     private fun winSet(viewModel: ScoreboardViewModel, team: String) =
         repeat(25) { viewModel.incrementScore(team) }

@@ -13,8 +13,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 private const val TAG = "VolleyballViewModel"
 const val CURRENT_BOARD_STATE_KEY = "CURRENT_BOARD_STATE_KEY"
 
-// Volleyball default
-private const val WINNING_SCORE = 25
+// Volleyball rules (best of five): sets 1–4 go to 25, the deciding 5th set to 15, all won by 2
+private const val POINTS_TO_WIN_SET = 25
+private const val POINTS_TO_WIN_DECIDING_SET = 15
+private const val SETS_TO_WIN_MATCH = 3
 
 class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -141,8 +143,13 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
     )
 
     private fun checkSetAndMatchWinner(state: ScoreboardState): SetCheckResult {
-        val aWins = state.teamAScore >= WINNING_SCORE && state.teamAScore - state.teamBScore >= 2
-        val bWins = state.teamBScore >= WINNING_SCORE && state.teamBScore - state.teamAScore >= 2
+        // The deciding set is the one played when both teams are one set away from the match
+        val isDecidingSet = state.teamASets == SETS_TO_WIN_MATCH - 1 &&
+                state.teamBSets == SETS_TO_WIN_MATCH - 1
+        val pointsToWin = if (isDecidingSet) POINTS_TO_WIN_DECIDING_SET else POINTS_TO_WIN_SET
+
+        val aWins = state.teamAScore >= pointsToWin && state.teamAScore - state.teamBScore >= 2
+        val bWins = state.teamBScore >= pointsToWin && state.teamBScore - state.teamAScore >= 2
 
         var updatedState = state
         var setWinMsg: String? = null
@@ -159,8 +166,8 @@ class ScoreboardViewModel(private val savedStateHandle: SavedStateHandle) : View
 
         if (updatedState.matchWinner == null) {
             val matchWinner = when {
-                updatedState.teamASets >= 3 -> "A"
-                updatedState.teamBSets >= 3 -> "B"
+                updatedState.teamASets >= SETS_TO_WIN_MATCH -> "A"
+                updatedState.teamBSets >= SETS_TO_WIN_MATCH -> "B"
                 else -> null
             }
             // Only update if a team just won

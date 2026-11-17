@@ -405,6 +405,27 @@ class MainActivityTest {
     }
 
     /**
+     * In the deciding 5th set the match ends at 15: from 2–2 in sets and 14–13, one tap for
+     * Team A wins the match, shows the dialog and leaves Team A on 3 sets.
+     */
+    @Test
+    fun decidingSetEndsAt15() {
+        addPoints("A", 25)
+        addPoints("B", 25)
+        addPoints("A", 25)
+        addPoints("B", 25)
+        addPoints("B", 13)
+        addPoints("A", 14)
+        onView(withId(R.id.textview_team_a_score)).check(matches(withText("14")))
+
+        onView(withId(R.id.team_a_score_area)).perform(click())
+        dismissMatchWonDialog()
+
+        onView(withId(R.id.textview_team_a_sets)).check(matches(withText(containsString("3"))))
+        onView(withId(R.id.textview_winner)).check(matches(isDisplayed()))
+    }
+
+    /**
      * Adds [points] for [team] straight through the Activity's own ViewModel: fast test setup
      * without one Espresso click per point.
      */
