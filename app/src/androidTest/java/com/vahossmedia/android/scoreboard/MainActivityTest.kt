@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
@@ -385,6 +386,22 @@ class MainActivityTest {
         onView(withId(R.id.textview_team_a_score)).check(matches(withText("1")))
         onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("0"))))
         onView(withId(R.id.textview_winner)).check(matches(not(isDisplayed())))
+    }
+
+    /**
+     * The match-won dialog is a one-time event: once dismissed, recreating the screen
+     * (as on rotation) does not show it again, while the result stays on screen.
+     */
+    @Test
+    fun matchWonDialogIsNotShownAgainAfterRotation() {
+        winMatchForTeamB()
+        dismissMatchWonDialog()
+
+        scenario.recreate()
+
+        onView(withText("Match Won!")).check(doesNotExist())
+        onView(withId(R.id.textview_winner)).check(matches(isDisplayed()))
+        onView(withId(R.id.textview_team_b_sets)).check(matches(withText(containsString("3"))))
     }
 
     /**
